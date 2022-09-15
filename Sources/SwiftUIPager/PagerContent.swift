@@ -178,39 +178,30 @@ extension Pager {
             self.content = content
         }
 
-        var contentViews: some View {
-            Group{
-                ForEach(dataDisplayed, id: id) { item in
-                    Group {
-                        if self.isInifinitePager && self.isEdgePage(item) {
-                            EmptyView()
-                        } else {
-                            self.content(item.element)
-                                .frame(size: self.pageSize)
-                                .scaleEffect(self.scale(for: item))
-                                .rotation3DEffect((self.isHorizontal ? .zero : Angle(degrees: -90)) - self.scrollDirectionAngle,
-                                                  axis: (0, 0, 1))
-                                .rotation3DEffect(self.angle(for: item),
-                                                  axis:  self.axis)
-                                .opacity(opacity(for: item))
-                        }
-                    }
-                }
-            }
-            .offset(x: self.xOffset, y : self.yOffset)
-        }
-
         var stack: some View {
-            if #available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *) {
+            if #available(macOS 11.0, iOS 14.0, *) {
                 return LazyHStack(spacing: interactiveItemSpacing) {
-                    self.contentViews
+                    ForEach(dataDisplayed, id: id) { item in
+                        Group {
+                            if self.isInifinitePager && self.isEdgePage(item) {
+                                EmptyView()
+                            } else {
+                                self.content(item.element)
+                                    .frame(size: self.pageSize)
+                                    .scaleEffect(self.scale(for: item))
+                                    .rotation3DEffect((self.isHorizontal ? .zero : Angle(degrees: -90)) - self.scrollDirectionAngle,
+                                                      axis: (0, 0, 1))
+                                    .rotation3DEffect(self.angle(for: item),
+                                                      axis:  self.axis)
+                                    .opacity(opacity(for: item))
+                            }
+                        }
+                        .offset(x: self.xOffset, y : self.yOffset)
+                    }
                 }
                 .frame(size: size)
             } else {
-                return HStack(spacing: interactiveItemSpacing) {
-                    self.contentViews
-                }
-                .frame(size: size)
+                return EmptyView()
             }
         }
 
