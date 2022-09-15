@@ -178,8 +178,8 @@ extension Pager {
             self.content = content
         }
 
-        var body: some View {
-            let stack = HStack(spacing: interactiveItemSpacing) {
+        var contentViews: some View {
+            Group{
                 ForEach(dataDisplayed, id: id) { item in
                     Group {
                         if self.isInifinitePager && self.isEdgePage(item) {
@@ -196,9 +196,25 @@ extension Pager {
                         }
                     }
                 }
-                .offset(x: self.xOffset, y : self.yOffset)
             }
-            .frame(size: size)
+            .offset(x: self.xOffset, y : self.yOffset)
+        }
+
+        var stack: some View {
+            if #available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *) {
+                return LazyHStack(spacing: interactiveItemSpacing) {
+                    self.contentViews
+                }
+                .frame(size: size)
+            } else {
+                return HStack(spacing: interactiveItemSpacing) {
+                    self.contentViews
+                }
+                .frame(size: size)
+            }
+        }
+
+        var body: some View {
 
             #if !os(tvOS)
             var wrappedView: AnyView = swipeInteractionArea == .page ? AnyView(stack) : AnyView(stack.contentShape(Rectangle()))
